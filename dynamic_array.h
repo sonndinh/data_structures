@@ -1,3 +1,4 @@
+#include <iostream>
 #include <initializer_list>
 #include <iterator> // std::distance
 
@@ -10,14 +11,14 @@ public:
 	DynamicArray() {
 		size_ = 0;
 		capacity_ = DEFAULT_CAP;
-		arr_ = new T[capacity_];
+		arr_ = new T[capacity_]{};
 	}
 
 	// Copy constructor.
 	DynamicArray(const DynamicArray& that) {
 		size_ = that.size();
 		capacity_ = that.capacity();
-		arr_ = new T[capacity_];
+		arr_ = new T[capacity_]{};
 		
 		for (int i = 0; i < size_; ++i) {
 			*(arr_ + i) = that[i];
@@ -36,21 +37,21 @@ public:
 	DynamicArray(std::initializer_list<T> il) {
 		size_ = il.size();
 		capacity_ = 2 * size_;
-		arr_ = new T[capacity_];
+		arr_ = new T[capacity_]{};
 
 		size_t i = 0;
-		for (std::initializer_list<T>::iterator it = il.begin(); it != il.end(); ++it) {
+		for (typename std::initializer_list<T>::iterator it = il.begin(); it != il.end(); ++it) {
 			*(arr_ + i) = *it;
 			++i;
 		}
 	}
 
 	// Construct from input iterators.
-	template <InputIterator>
+	template <typename InputIterator>
 	DynamicArray(InputIterator first, InputIterator last) {
 		size_ = std::distance(first, last);
 		capacity_ = 2 * size_;
-		arr_ = new T[capacity_];
+		arr_ = new T[capacity_]{};
 
 		size_t i = 0;
 		for (InputIterator it = first; it != last; ++it) {
@@ -69,7 +70,7 @@ public:
 	DynamicArray& operator= (const DynamicArray& that) {
 		size_ = that.size();
 		capacity_ = that.capacity();
-		arr_ = new T[capacity_];
+		arr_ = new T[capacity_]{};
 
 		for (size_t i = 0; i < size_; ++i) {
 			*(arr_ + i) = that[i];
@@ -90,10 +91,10 @@ public:
 	DynamicArray& operator= (std::initializer_list<T> il) {
 		size_ = il.size();
 		capacity_ = 2 * size_;
-		arr_ = new T[capacity_];
+		arr_ = new T[capacity_]{};
 
 		size_t i = 0;
-		for (std::initializer_list<T>::iterator it = il.begin(); it != il.end(); ++it) {
+		for (typename std::initializer_list<T>::iterator it = il.begin(); it != il.end(); ++it) {
 			*(arr_ + i) = *it;
 			++i;
 		}		
@@ -115,10 +116,15 @@ public:
 			for (size_t i = k; i < size_; ++i) {
 				arr_[i].~T();
 			}
-			size_ = k;
-		} else if (k > capacity_) {
-			
+		} else if (k > size_ && k < capacity_) {
+			for (size_t i = size_; i < k; ++i) {
+				new (arr_ + i) T{};
+			}
+		} else if (k >= capacity_) {
+			capacity_ = k + 1;
+			copy_to_new_array();
 		}
+		size_ = k;
 	}
 
 	// Return the capacity.
@@ -193,10 +199,11 @@ private:
 	}
 
 	void copy_to_new_array() {
-		T *temp = new T[capacity_];
+		T *temp = new T[capacity_]{};
 		for (size_t i = 0; i < size_; ++i) {
 			temp[i] = arr_[i];
 			// NOTE: should I expicitly call destructor for each entry in arr_.
+			arr_[i].~T();
 		}
 		delete[] arr_;
 		arr_ = temp;		
