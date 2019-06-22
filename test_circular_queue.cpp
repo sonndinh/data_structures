@@ -1,5 +1,6 @@
 #include "circular_queue.h"
 
+using namespace std;
 
 struct Message {
 	string data;

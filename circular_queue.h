@@ -2,9 +2,7 @@
 #include <cstdlib>
 #include <string>
 
-using namespace std;
 
-// A circular buffer.
 template <typename T>
 class CircularQueue {	
 public:
@@ -31,7 +29,7 @@ public:
 	// Return reference to the next item.
 	const T& top() {
 		if (counter == 0) {
-			throw length_error("ERROR: Queue is empty!");
+			throw std::length_error("ERROR: Queue is empty!");
 		}
 		return *(arr + head);
 	}
@@ -39,7 +37,7 @@ public:
 	// Remove the top item from the queue.
 	void pop() {
 		if (counter == 0) {
-			throw length_error("ERROR: Queue is empty!");
+			throw std::length_error("ERROR: Queue is empty!");
 		}
 		head++;
 		head = head % capacity;
@@ -48,7 +46,7 @@ public:
 	
     void push(const T& msg) {
         if (tail == head && counter > 0) {
-			throw length_error("ERROR: Queue is full!");
+			throw std::length_error("ERROR: Queue is full!");
         }		
         arr[tail] = msg;
         tail++;

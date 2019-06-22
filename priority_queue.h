@@ -1,73 +1,106 @@
+#include <functional>
 #include <vector>
 
-using namespace std;
-
-// Implement a max-priority queue using a max-binary heap.
-template <typename T>
+// Implement using binary heap. Default is min-priority queue.
+// STL vector is used as the internal store.
+template <typename T, typename Compare = std::less<T>>
 class PriorityQueue {
 public:
-	PriorityQueue() {
-		arr = new T[INIT_CAP];
-		capacity = INIT_CAP;
-		heap_size = 0;
-	}
+	PriorityQueue(const Compare& comp = Compare()) : comp_(comp) {}
 
-	PriorityQueue(const PriorityQueue& rhs) {
-		size = rhs.size();
-		capacity = size;
-		arr = new T[size];
-		for (size_t i = 0; i < size; i++) {
-			
-		}
-	}
+	// Copy constructor.
+	PriorityQueue(const PriorityQueue& rhs, const Compare& comp = Compare()) : data_(rhs.data_), comp_(comp) {}
 
-	PriorityQueue(PriorityQueue&& rhs) {
-	}
+	// Move constructor.
+	PriorityQueue(PriorityQueue&& rhs, const Compare& comp = Compare()) : data_(rhs.data_), comp_(comp) {}
 
-	~PriorityQueue() {
-		delete[] arr;
-	}
+	~PriorityQueue() {}
 
 	// Return the number of elements in queue.
-	size_t size() {
-		return heap_size;
+	size_t size() const {
+		return data_.size();
 	}
 
-	bool empty() {
-		return heap_size == 0;
+	bool empty() const {
+		return data_.empty();
 	}
 
-	// Return reference to the maximum entry.
-	const T& top() {
+	// Return a constant reference to the top entry.
+	const T& top() const {
+		return data_.front();
 	}
 
-	// Remove the top entry from the queue.
+	// Return a reference to the top entry.
+	T& top() const {
+		return data_.front();
+	}
+
+	// Remove the top entry from the heap.
 	void pop() {
+		// Do nothing if the heap is empty.
+		if (data_.empty())
+			return;
+
+		int last = data_.size() - 1;
+		swap(data_[0], data_[last]);
+		data_.pop_back();
+		heapify(0);
 	}
 
 	// Insert a new entry.
 	void push(const T& t) {
+		data_.push_back(t);
+		int last = data_.size() - 1;
+		swap(data_[0], data_[last]);
+		heapify(0);
 	}
 
 private:
-	size_t parent(size_t i) {
+	// Return index of the parent index for entry i.
+	size_t parent(size_t i) const {
+		return (i - 1)/2;
 	}
 
-	size_t left(size_t i) {
+	// Return index of the left child for entry i.
+	size_t left(size_t i) const {
+		return (2*i + 1);
 	}
 
-	size_t right(size_t i) {
+	size_t right(size_t i) const {
+		return (2*i + 2);
 	}
-	
+
+	// Assuming the left and right subtrees satisfy heap property.
 	void heapify(size_t i) {
+		size_t l = left(i);
+		size_t r = right(i);
+		size_t largest = i;
+		
+		if (l < data_.size() && comp_(data_[i], data_[l])) {
+			largest = l;
+		}
+		if (r < data_.size() && comp_(data_[largest], data_[r])) {
+			largest = r;
+		}
+
+		if (largest != i) {
+			swap(data_[i], data_[largest]);
+			heapify(largest);
+		}
 	}
 
+	// Build heap from an array of entries.
 	void build_heap() {
+		int size = data_.size();
+		for (int i = (size - 2)/2; i >= 0; --i) {
+			heapify(i);
+		}
 	}
 	
 private:
-	T *arr[];
-	size_t capacity;
-	size_t heap_size;
-	static const size_t INIT_CAP = 64;
+	// The top element is always the first element.
+	std::vector<T> data_;
+
+	// A functor for comparing two elements.
+	Compare comp_;
 };
