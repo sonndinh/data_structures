@@ -7,19 +7,19 @@ template <typename T, typename Compare = std::less<T>>
 class PriorityQueue {
 public:
 	// Default constructor.
-	PriorityQueue(const Compare& comp = Compare()) : comp_(comp) {}
+	PriorityQueue(const Compare& comp = Compare()) : comp_{comp} {}
 
 	// Initialize through iterator.
 	template <typename InputIterator>
-	PriorityQueue(InputIterator first, InputIterator last, const Compare& comp = Compare()) : data_(first, last), comp_(comp) {
+	PriorityQueue(InputIterator first, InputIterator last, const Compare& comp = Compare()) : data_{first, last}, comp_{comp} {
 		build_heap();
 	}
 	
 	// Copy constructor.
-	PriorityQueue(const PriorityQueue& rhs, const Compare& comp = Compare()) : data_(rhs.data_), comp_(comp) {}
+	PriorityQueue(const PriorityQueue& rhs, const Compare& comp = Compare()) : data_{rhs.data_}, comp_{comp} {}
 
 	// Move constructor.
-	PriorityQueue(PriorityQueue&& rhs, const Compare& comp = Compare()) : data_(rhs.data_), comp_(comp) {}
+	PriorityQueue(PriorityQueue&& rhs, const Compare& comp = Compare()) : data_{rhs.data_}, comp_{comp} {}
 
 	~PriorityQueue() {}
 
